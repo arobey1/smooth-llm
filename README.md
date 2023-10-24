@@ -4,6 +4,8 @@
 
 This is the official source code for "[SmoothLLM: Defending LLMs Against Jailbreaking Attacks](https://arxiv.org/abs/2310.03684)" by [Alex Robey](https://arobey1.github.io/), [Eric Wong](https://riceric22.github.io/), [Hamed Hassani](https://www.seas.upenn.edu/~hassani/), and [George J. Pappas](https://www.georgejpappas.org/).  To learn more about our work, see [our blog post](https://debugml.github.io/smooth-llm/).
 
+![Overview of SmoothLLM results.](assets/overview.png)
+
 ## Installation
 
 **Step 1:** Create an empty virtual environment.
