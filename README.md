@@ -1,6 +1,6 @@
 # SmoothLLM
 
-This is the official source code for [SmoothLLM: Defending LLMs Against Jailbreaking Attacks](https://arxiv.org/abs/2310.03684) by Alex Robey, Eric Wong, Hamed Hassani, and George J. Pappas.
+This is the official source code for [SmoothLLM: Defending LLMs Against Jailbreaking Attacks](https://arxiv.org/abs/2310.03684) by Alex Robey, Eric Wong, Hamed Hassani, and George J. Pappas.  To learn more about our work, see [our blog post](https://debugml.github.io/smooth-llm/).
 
 ## Installation
 
