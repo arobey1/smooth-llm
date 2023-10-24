@@ -7,8 +7,8 @@ import pandas as pd
 from tqdm.auto import tqdm
 from ml_collections import config_flags
 
-import perturbations
-import llm_wrappers
+import lib.perturbations as perturbations
+import lib.llm_wrappers as wrappers
 from llm_attacks import get_workers
 
 TEST_PREFIXES = [
@@ -55,7 +55,7 @@ def main(_):
 
     # Create SmoothLLM object
     workers, test_workers = get_workers(params, eval=True)
-    smoothLLM = llm_wrappers.SmoothLLM(
+    smoothLLM = wrappers.SmoothLLM(
         workers,
         perturbation_fn=perturbation_fn,
         num_copies=params.num_smoothing_copies,
