@@ -1,14 +1,10 @@
 #!/bin/bash
 
-cd ../llm-attacks/
-pip install -e .
-cd ../smooth-llm
-
 if [ $1 == "vicuna" ]; then
-    config=configs/individual_vicuna.py
+    config=configs/vicuna.py
     logfile=data/vicuna_behaviors.json
 elif [ $1 == "llama" ]; then
-    config=configs/individual_llama2.py
+    config=configs/llama2.py
     logfile=data/llama2_behaviors.json
 else
     echo "Invalid argument $1.  Please choose from ['vicuna', 'llama']."
