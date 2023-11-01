@@ -77,3 +77,8 @@ class GCG(Attack):
         )
 
     
+class PAIR(Attack):
+    def __init__(self, logfile):
+        super(GCG, self).__init__(logfile)
+
+    

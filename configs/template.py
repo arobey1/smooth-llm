@@ -33,7 +33,7 @@ def get_config():
     config.perturbation_type = ''
     config.perturbation_percentage = 0
     config.num_smoothing_copies = 1
-    config.smoothing_results_dir = ''
+    config.smoothing_results_dir = 'results'
     config.logfile = ''
     config.attack = 'GCG'
 

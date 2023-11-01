@@ -32,8 +32,6 @@ class SmoothLLM:
     @torch.no_grad()
     def __call__(self, prompt, batch_size=64, max_new_len=100):
 
-        print(prompt.full_prompt)
-
         all_inputs = []
         for _ in range(self.num_copies):
             prompt_copy = copy.deepcopy(prompt)
