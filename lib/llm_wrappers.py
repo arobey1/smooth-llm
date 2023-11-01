@@ -1,10 +1,5 @@
 import torch
-
-from llm_attacks import (
-    AttackPrompt,
-    MultiPromptAttack,
-    PromptManager
-)
+import copy
 
 class SmoothLLM:
 
@@ -24,12 +19,6 @@ class SmoothLLM:
         )
 
         self.test_prefixes = test_prefixes
-        self.managers = {
-            "AP": AttackPrompt,
-            "PM": PromptManager,
-            "MPA": MultiPromptAttack
-        }
-
         self.perturbation_fn = perturbation_fn
         self.num_copies = num_copies
 
@@ -41,37 +30,15 @@ class SmoothLLM:
         ])
 
     @torch.no_grad()
-    def __call__(self, goal, target, control, batch_size=64, max_new_len=100):
+    def __call__(self, prompt, batch_size=64, max_new_len=100):
 
-        # Load GCG attack prompt
-        attack = self.managers['MPA'](
-            [goal], 
-            [target],
-            self.workers,
-            control,
-            self.test_prefixes,
-            logfile=None,
-            managers=self.managers,
-        )
+        print(prompt.full_prompt)
 
-        # Calculate max number of tokens to generate for each prompt
-        max_new_tokens = max(
-            [p.test_new_toks for p in attack.prompts[0]._prompts][0],
-            max_new_len
-        ) 
-
-        # extract the goal and control from the input prompt
-        clean_input = [p.eval_str for p in attack.prompts[0]._prompts][0]
-        start_index = clean_input.find(goal)
-        end_index = clean_input.find(control) + len(control)
-        clean_prompt = clean_input[start_index:end_index]
-
-        # apply perturbation function to copies 
         all_inputs = []
         for _ in range(self.num_copies):
-            perturbed_prompt = self.perturbation_fn(clean_prompt)
-            perturbed_input = clean_input.replace(clean_prompt, perturbed_prompt)
-            all_inputs.append(perturbed_input)
+            prompt_copy = copy.deepcopy(prompt)
+            prompt_copy.perturb(self.perturbation_fn)
+            all_inputs.append(prompt_copy.full_prompt)
 
         # Iterate each batch of inputs
         all_outputs = []
@@ -81,7 +48,10 @@ class SmoothLLM:
             batch = all_inputs[i * batch_size:(i+1) * batch_size]
 
             # Run a forward pass through the LLM for each perturbed copy
-            batch_outputs = self.LLM(batch, max_new_tokens=max_new_tokens)
+            batch_outputs = self.LLM(
+                batch=batch, 
+                max_new_tokens=prompt.max_new_tokens
+            )
 
             all_outputs.extend(batch_outputs)
             torch.cuda.empty_cache()

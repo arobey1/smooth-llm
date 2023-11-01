@@ -9,6 +9,7 @@ from ml_collections import config_flags
 
 import lib.perturbations as perturbations
 import lib.llm_wrappers as wrappers
+import lib.attacks as attacks
 from llm_attacks import get_workers
 
 TEST_PREFIXES = [
@@ -40,11 +41,6 @@ def main(_):
     )
     os.makedirs(root, exist_ok=True)
 
-    # Load goals, targets, and suffixes (a.k.a. "controls") from disk.
-    with open(params.logfile, 'r') as f:
-        log = json.load(f)
-    goals, targets, controls = log['goal'], log['target'], log['controls']
-
     # Create perturbation function instance; called by SmoothLLM
     if params.perturbation_type in vars(perturbations):
         perturbation_fn = vars(perturbations)[params.perturbation_type](
@@ -62,11 +58,19 @@ def main(_):
         test_prefixes=TEST_PREFIXES
     )
 
+    # Create attack instance, used to create prompts
+    if params.attack.upper() in vars(attacks):
+        attack = vars(attacks)[params.attack.upper()](
+            logfile=params.logfile,
+            workers=workers
+        )
+    else:
+        raise NotImplementedError
+
     num_errors = 0
     jailbroken_results = []
-    for i, (goal, target, control) in tqdm(enumerate(zip(goals, targets, controls))):
-
-        are_copies_jailbroken = smoothLLM(goal, target, control)
+    for i, prompt in tqdm(enumerate(attack.prompts)):
+        are_copies_jailbroken = smoothLLM(prompt)
 
         # Check to ensure that we didn't incur an error in the forward pass
         if len(are_copies_jailbroken) == 0:
