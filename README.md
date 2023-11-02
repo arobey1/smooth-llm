@@ -55,7 +55,7 @@ The following codebases have reimplemented our results:
 ## Citation
 If you find this codebase useful in your research, please consider citing:
 
-```
+```bibtex
 @article{robey2023smoothllm,
   title={SmoothLLM: Defending Large Language Models Against Jailbreaking Attacks},
   author={Robey, Alexander and Wong, Eric and Hassani, Hamed and Pappas, George J},
