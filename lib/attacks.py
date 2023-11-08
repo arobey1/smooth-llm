@@ -1,4 +1,7 @@
 import json
+import copy
+import pandas as pd
+from fastchat.model import get_conversation_template
 
 from llm_attacks import (
     AttackPrompt,
@@ -25,6 +28,15 @@ class Attack:
         self.logfile = logfile
 
 class GCG(Attack):
+
+    """Greedy Coordinate Gradient attack.
+
+    Title: Universal and Transferable Adversarial Attacks on 
+                Aligned Language Models
+    Authors: Andy Zou, Zifan Wang, J. Zico Kolter, Matt Fredrikson
+    Paper: https://arxiv.org/abs/2307.15043
+    """
+
     def __init__(self, logfile, workers):
         super(GCG, self).__init__(logfile)
 
@@ -76,9 +88,39 @@ class GCG(Attack):
             max_new_tokens
         )
 
-    
 class PAIR(Attack):
-    def __init__(self, logfile):
-        super(GCG, self).__init__(logfile)
 
-    
+    """Prompt Automatic Iterative Refinement (PAIR) attack.
+
+    Title: Jailbreaking Black Box Large Language Models in Twenty Queries
+    Authors: Patrick Chao, Alexander Robey, Edgar Dobriban, Hamed Hassani, 
+                George J. Pappas, Eric Wong
+    Paper: https://arxiv.org/abs/2310.08419
+    """
+
+    def __init__(self, logfile, workers):
+        super(PAIR, self).__init__(logfile)
+
+        self.workers = workers
+
+        df = pd.read_pickle(logfile)
+        jailbreak_prompts = df['jailbreak_prompt'].to_list()
+        
+        self.prompts = [
+            self.create_prompt(prompt)
+            for prompt in jailbreak_prompts
+        ]
+        
+    def create_prompt(self, prompt):
+        
+        template = copy.deepcopy(self.workers[0].conv_template)
+        template.append_message(template.roles[0], prompt)
+        template.append_message(template.roles[1], None) 
+        
+        full_prompt = template.get_prompt()
+
+        return Prompt(
+            full_prompt,
+            prompt,
+            max_new_tokens=100
+        )

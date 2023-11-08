@@ -37,7 +37,9 @@ def main(_):
     # Create output directories
     root = os.path.join(
         params.smoothing_results_dir,
-        f'{params.conversation_templates[0]}'
+        f'{params.conversation_templates[0]}',
+        f'trial-{params.trial_index}',
+        f'n-{params.num_smoothing_copies}-type-{params.perturbation_type}-pct-{params.perturbation_percentage}'
     )
     os.makedirs(root, exist_ok=True)
 
@@ -91,12 +93,13 @@ def main(_):
         'Number of smoothing copies': [params.num_smoothing_copies],
         'Perturbation type': [params.perturbation_type],
         'Perturbation percentage': [params.perturbation_percentage],
-        'JB percentage': [np.mean(jailbroken_results) * 100]
+        'JB percentage': [np.mean(jailbroken_results) * 100],
+        'Trial index': [params.trial_index]
     })
     summary_df.to_pickle(os.path.join(
         root, 'summary.pd'
     ))
-    print(summary_df)
+    # print(summary_df)
 
 
 if __name__ == '__main__':

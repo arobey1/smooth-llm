@@ -36,6 +36,7 @@ def get_config():
     config.smoothing_results_dir = 'results'
     config.logfile = ''
     config.attack = 'GCG'
+    config.trial_index=0
 
     # data
     config.train_data = ''
