@@ -70,9 +70,5 @@ class SmoothLLM(Defense):
         # Check whether the outputs jailbreak the LLM
         return [self.is_jailbroken(s) for s in all_outputs]
 
-# class SemanticSmoothing(Defense):
-    
-#     def __init__(self, target_model):
-#         super(SemanticSmoothing, self).__init__(target_model)
 
         
