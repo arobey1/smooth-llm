@@ -1,13 +1,5 @@
 import json
-import copy
 import pandas as pd
-from fastchat.model import get_conversation_template
-
-from llm_attacks import (
-    AttackPrompt,
-    MultiPromptAttack,
-    PromptManager
-)
 
 class Prompt:
     def __init__(self, full_prompt, perturbable_prompt, max_new_tokens):
@@ -24,8 +16,9 @@ class Prompt:
         self.perturbable_prompt = perturbed_prompt
 
 class Attack:
-    def __init__(self, logfile):
+    def __init__(self, logfile, target_model):
         self.logfile = logfile
+        self.target_model = target_model
 
 class GCG(Attack):
 
@@ -37,15 +30,8 @@ class GCG(Attack):
     Paper: https://arxiv.org/abs/2307.15043
     """
 
-    def __init__(self, logfile, workers):
-        super(GCG, self).__init__(logfile)
-
-        self.workers = workers
-        self.managers = {
-            "AP": AttackPrompt,
-            "PM": PromptManager,
-            "MPA": MultiPromptAttack
-        }
+    def __init__(self, logfile, target_model):
+        super(GCG, self).__init__(logfile, target_model)
 
         with open(self.logfile, 'r') as f:
             log = json.load(f)
@@ -62,21 +48,27 @@ class GCG(Attack):
     def create_prompt(self, goal, control, target, max_new_len=100):
         """Create GCG prompt."""
 
-        # Load GCG attack prompt
-        attack = self.managers['MPA'](
-            [goal], 
-            [target],
-            self.workers,
-            control,
-            test_prefixes=[],
-            logfile=None,
-            managers=self.managers,
-        )
         max_new_tokens = max(
-            [p.test_new_toks for p in attack.prompts[0]._prompts][0],
+            len(self.target_model.tokenizer(target).input_ids) + 2,
             max_new_len
         )
-        full_prompt = [p.eval_str for p in attack.prompts[0]._prompts][0]
+
+        # Create full prompt for LLM
+        conv_template = self.target_model.conv_template
+        conv_template.append_message(
+            conv_template.roles[0], f"{goal} {control}"
+        )
+        conv_template.append_message(conv_template.roles[1], f"")
+        prompt = conv_template.get_prompt()
+
+        # As per the GCG source code, we encode then decode the full prompt
+        encoding = self.target_model.tokenizer(prompt)
+        full_prompt = self.target_model.tokenizer.decode(
+            encoding.input_ids
+        ).replace('<s>','').replace('</s>','')
+
+        # Clear the conv template
+        conv_template.messages = []
         
         start_index = full_prompt.find(goal)
         end_index = full_prompt.find(control) + len(control)
@@ -98,10 +90,8 @@ class PAIR(Attack):
     Paper: https://arxiv.org/abs/2310.08419
     """
 
-    def __init__(self, logfile, workers):
-        super(PAIR, self).__init__(logfile)
-
-        self.workers = workers
+    def __init__(self, logfile, target_model):
+        super(PAIR, self).__init__(logfile, target_model)
 
         df = pd.read_pickle(logfile)
         jailbreak_prompts = df['jailbreak_prompt'].to_list()
@@ -112,12 +102,14 @@ class PAIR(Attack):
         ]
         
     def create_prompt(self, prompt):
-        
-        template = copy.deepcopy(self.workers[0].conv_template)
-        template.append_message(template.roles[0], prompt)
-        template.append_message(template.roles[1], None) 
-        
-        full_prompt = template.get_prompt()
+
+        conv_template = self.target_model.conv_template
+        conv_template.append_message(conv_template.roles[0], prompt)
+        conv_template.append_message(conv_template.roles[1], None)
+        full_prompt = conv_template.get_prompt()
+
+        # Clear the conv template
+        conv_template.messages = []
 
         return Prompt(
             full_prompt,
