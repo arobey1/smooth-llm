@@ -50,7 +50,6 @@ def main(args):
     # Create SmoothLLM instance
     smoothLLM = defenses.SmoothLLM(
         target_model=target_model,
-        # perturbation_fn=perturbation_fn,
         pert_type=args.smoothllm_pert_type,
         pert_pct=args.smoothllm_pert_pct,
         num_copies=args.smoothllm_num_copies,

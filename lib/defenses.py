@@ -19,7 +19,6 @@ class SmoothLLM(Defense):
 
     def __init__(self, 
         target_model,
-        # perturbation_fn,
         pert_type,
         pert_pct,
         num_copies,
@@ -28,7 +27,6 @@ class SmoothLLM(Defense):
         super(SmoothLLM, self).__init__(target_model)
         
         self.test_prefixes = test_prefixes
-        # self.perturbation_fn = perturbation_fn
         self.num_copies = num_copies
 
         self.perturbation_fn = vars(perturbations)[pert_type](
@@ -69,6 +67,3 @@ class SmoothLLM(Defense):
             
         # Check whether the outputs jailbreak the LLM
         return [self.is_jailbroken(s) for s in all_outputs]
-
-
-        
