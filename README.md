@@ -4,7 +4,6 @@
 
 This is the official source code for "[SmoothLLM: Defending LLMs Against Jailbreaking Attacks](https://arxiv.org/abs/2310.03684)" by [Alex Robey](https://arobey1.github.io/), [Eric Wong](https://riceric22.github.io/), [Hamed Hassani](https://www.seas.upenn.edu/~hassani/), and [George J. Pappas](https://www.georgejpappas.org/).  To learn more about our work, see [our blog post](https://debugml.github.io/smooth-llm/).
 
-<!-- ![Overview of SmoothLLM results.](assets/overview.png) -->
 ![Introduction to SmoothLLM](assets/introduction.gif)
 
 ## Installation
@@ -26,12 +25,23 @@ pip install -e .
 
 **Step 3:** Download the weights for [Vicuna](https://huggingface.co/lmsys/vicuna-13b-v1.5) and/or [Llama2](https://huggingface.co/meta-llama/Llama-2-7b-chat-hf) from HuggingFace.  
 
-**Step 4:** Change the paths to the model and tokenizer in `configs/vicuna.py` and/or `configs/llama2.py` depending on which set(s) of weights you downloaded in Step 3.  E.g., for vicuna, change the following paths in `configs/vicuna.py`:
+**Step 4:** Change the paths to the model and tokenizer in `lib/model_configs.py` depending on which set(s) of weights you downloaded in Step 3.
 
-```bash
-config.model_paths = ["/path/to/vicuna-13b-v1.5"]
-config.tokenizer_paths = ["/path/to/vicuna-13b-v1.5"]
+```python
+MODELS = {
+    'llama2': {
+        'model_path': '/shared_data0/arobey1/llama-2-7b-chat-hf',
+        'tokenizer_path': '/shared_data0/arobey1/llama-2-7b-chat-hf',
+        'conversation_template': 'llama-2'
+    },
+    'vicuna': {
+        'model_path': '/shared_data0/arobey1/vicuna-13b-v1.5',
+        'tokenizer_path': '/shared_data0/arobey1/vicuna-13b-v1.5',
+        'conversation_template': 'vicuna'
+    }
+}
 ```
+The `conversation_template` value is used to initialize a `fastchat` conversation template.
 
 ## Experiments
 
