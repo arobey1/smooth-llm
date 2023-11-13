@@ -39,7 +39,6 @@ def main(args):
         target_model=target_model
     )
 
-    num_errors = 0
     jailbroken_results = []
     for i, prompt in tqdm(enumerate(attack.prompts)):
         output = defense(prompt)

@@ -52,7 +52,6 @@ class SmoothLLM(Defense):
         super(SmoothLLM, self).__init__(target_model)
         
         self.num_copies = num_copies
-
         self.perturbation_fn = vars(perturbations)[pert_type](
             q=pert_pct
         )
